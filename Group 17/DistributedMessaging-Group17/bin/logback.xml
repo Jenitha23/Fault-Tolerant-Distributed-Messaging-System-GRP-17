@@ -1,0 +1,74 @@
+<configuration scan="true" scanPeriod="30 seconds">
+  <!-- ========= Encoders / Patterns ========= -->
+  <property name="LOG_PATTERN" value="%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"/>
+
+  <!-- ========= Appenders ========= -->
+  <!-- Console -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>${LOG_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Rolling File: logs/dms-app.log -->
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>logs/dms-app.log</file>
+    <append>true</append>
+    <encoder>
+      <pattern>${LOG_PATTERN}</pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <!-- rollover daily, and when file exceeds 10MB -->
+      <fileNamePattern>logs/dms-app.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+      <maxFileSize>10MB</maxFileSize>
+      <maxHistory>7</maxHistory>
+      <totalSizeCap>50MB</totalSizeCap>
+    </rollingPolicy>
+  </appender>
+
+  <!-- Async wrappers (prevent logging from blocking app threads) -->
+  <appender name="ASYNC_STDOUT" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="STDOUT"/>
+    <queueSize>512</queueSize>
+    <discardingThreshold>0</discardingThreshold>
+  </appender>
+
+  <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="FILE"/>
+    <queueSize>1024</queueSize>
+    <discardingThreshold>0</discardingThreshold>
+  </appender>
+
+  <!-- ========= Your packages (set DEBUG here if you need it) ========= -->
+  <logger name="demo" level="INFO"/>
+  <logger name="network" level="INFO"/>
+  <logger name="coordination" level="INFO"/>
+  <logger name="faulttolerance" level="INFO"/>
+  <logger name="replication" level="INFO"/>
+  <logger name="timesync" level="INFO"/>
+  <logger name="common" level="INFO"/>
+
+  <!-- ========= Quiet noisy libraries ========= -->
+  <!-- ZooKeeper -->
+  <logger name="org.apache.zookeeper" level="WARN"/>
+  <logger name="org.apache.zookeeper.ClientCnxn" level="WARN"/>
+  <logger name="org.apache.zookeeper.ClientCnxnSocket" level="WARN"/>
+  <logger name="org.apache.zookeeper.ZooKeeper" level="WARN"/>
+  <logger name="org.apache.zookeeper.server" level="WARN"/>
+
+  <!-- Jetty / Netty (bundled with ZK or elsewhere) -->
+  <logger name="org.eclipse.jetty" level="WARN"/>
+  <logger name="io.netty" level="WARN"/>
+
+  <!-- Misc common chatty libs -->
+  <logger name="org.apache.curator" level="WARN"/>
+  <logger name="org.apache.http" level="WARN"/>
+  <logger name="org.slf4j" level="WARN"/>
+
+  <!-- ========= Root logger ========= -->
+  <!-- Default root at INFO; send to console + file -->
+  <root level="INFO">
+    <appender-ref ref="ASYNC_STDOUT"/>
+    <appender-ref ref="ASYNC_FILE"/>
+  </root>
+</configuration>
